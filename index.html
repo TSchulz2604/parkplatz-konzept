@@ -26,8 +26,11 @@
     .secondary { background:#e5e7eb; color:#111827; }
     .resultHead { display:flex; justify-content:space-between; gap:12px; align-items:center; margin:12px 0; }
     .count { font-weight:700; color:var(--accent); }
+    .summary { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:10px; margin:12px 0; }
+    .summaryBox { border:1px solid var(--line); border-radius:12px; padding:12px; background:#f9fafb; }
+    .summaryBox strong { display:block; color:var(--accent); margin-bottom:4px; }
     .tableWrap { overflow-x:auto; background:white; border:1px solid var(--line); border-radius:14px; }
-    table { width:100%; border-collapse:collapse; min-width:900px; }
+    table { width:100%; border-collapse:collapse; min-width:1050px; }
     th, td { text-align:left; vertical-align:top; border-bottom:1px solid var(--line); padding:10px; font-size:.9rem; }
     th { background:#eef2f7; color:#111827; position:sticky; top:0; }
     a { color:var(--accent); font-weight:700; }
@@ -35,6 +38,7 @@
     .empty { padding:18px; color:var(--muted); background:white; border:1px dashed #cbd5e1; border-radius:14px; }
     @media (max-width: 780px) {
       .grid { grid-template-columns:1fr; }
+      .summary { grid-template-columns:1fr; }
       header h1 { font-size:1.15rem; }
       .checks { grid-template-columns:1fr; }
       main { padding:12px; }
@@ -52,7 +56,7 @@
       <section class="card">
         <h2>Räumliche Kriterien</h2>
         <label for="einsatzort">Einsatzort</label>
-        <select id="einsatzort">
+        <select id="einsatzort" onchange="filterData()">
           <option value="">Keine Auswahl</option>
           <option>Innenstadt</option>
           <option>Parkhaus</option>
@@ -60,22 +64,22 @@
           <option>Pendlerparkplätze</option>
           <option>Krankenhäuser / Kliniken</option>
           <option>Messegelände / Stadien</option>
-          <option>Einzelhandel</option>
+          <option>Einzelparkplätze</option>
         </select>
 
         <label for="parkraum">Parkraumgröße</label>
-        <select id="parkraum">
+        <select id="parkraum" onchange="filterData()">
           <option>bis 50</option>
-          <option>51 bis 200</option>
-          <option>über 200</option>
+          <option>51 bis 500</option>
+          <option>ab 500</option>
         </select>
-        <p class="small">Die Parkraumgröße dient hier als Auswahlparameter der Konzeptmatrix. Die Anbieterfilterung erfolgt anhand der verfügbaren Anbietermerkmale.</p>
+        <p class="small">Die Parkraumgröße bestimmt in der Konzeptbewertung den Infrastruktureingriff sowie den Wartungs- und Implementierungsaufwand.</p>
       </section>
 
       <section class="card">
         <h2>System- und Datenschutzkriterien</h2>
         <label for="integration">Integrationsgrad</label>
-        <select id="integration">
+        <select id="integration" onchange="filterData()">
           <option value="">Keine Auswahl</option>
           <option>Stand-alone</option>
           <option>Teilintegration</option>
@@ -83,7 +87,7 @@
         </select>
 
         <label for="digitalisierung">Digitalisierungsgrad</label>
-        <select id="digitalisierung">
+        <select id="digitalisierung" onchange="filterData()">
           <option value="">Keine Auswahl</option>
           <option>Analog unterstützt</option>
           <option>Teilautomatisiert</option>
@@ -91,7 +95,7 @@
         </select>
 
         <label for="datenschutz">Datenschutzanforderungen</label>
-        <select id="datenschutz">
+        <select id="datenschutz" onchange="filterData()">
           <option value="">Keine Auswahl</option>
           <option>Gering</option>
           <option>Mittel</option>
@@ -110,7 +114,7 @@
         <div class="checks" id="betriebsmodell"></div>
 
         <label for="nutzer">Nutzerinteraktion</label>
-        <select id="nutzer">
+        <select id="nutzer" onchange="filterData()">
           <option value="">Keine Auswahl</option>
           <option>Keine Nutzerinteraktion</option>
           <option>App Verfügbarkeit</option>
@@ -138,7 +142,7 @@
   </main>
 
 <script>
-const DATA = [{"firma": "Smart Parking GmbH", "einsatzumgebung": "Innenstadt; Parkhaus; Küstenregion; Pendlerparkplätze; Krankenhäuser / Kliniken; Messegelände / Stadien", "infrastrukturbedarf": "geringer Eingriff", "technologieart": "Kamerasysteme; Kennzeichenerkennung; Bezahlsystem; Cloud-Plattform; Parkautomaten; App-Lösung", "integrationsgrad": "Stand-alone; Teilintegration; Vollintegration", "digitalisierungsgrad": "Analog unterstützt; Teilautomatisiert; Vollautomatisiert", "datenschutz": "Mittel", "betriebsmodell": "SaaS; Managed Service", "nutzerinteraktion": "App Verfügbarkeit; Terminal Verfügbarkeit", "skalierbarkeit": "Einzelstandort; Mehrere Standorte; Stadtweite Lösungen", "wartungsaufwand": "Niedriger Wartungsaufwand", "implementierungsaufwand": "Niedriger Implementierungsaufwand", "website": "https://www.smartparking.com/de/"}, {"firma": "Arivo GmbH", "einsatzumgebung": "Innenstadt; Parkhaus; Küstenregion; Pendlerparkplätze; Krankenhäuser / Kliniken; Messegelände / Stadien", "infrastrukturbedarf": "geringer Eingriff", "technologieart": "Kamerasysteme; Kennzeichenerkennung; Schrankenloses System; Bezahlsystem; App-Lösung; Schrankensystem; Parkautomaten; Cloud-Plattform", "integrationsgrad": "Stand-alone; Teilintegration; Vollintegration", "digitalisierungsgrad": "Teilautomatisiert; Vollautomatisiert", "datenschutz": "Hoch", "betriebsmodell": "Eigenbetrieb; SaaS; Managed Service; Full Service", "nutzerinteraktion": "Keine Nutzerinteraktion; App Verfügbarkeit; Terminal Verfügbarkeit", "skalierbarkeit": "Einzelstandort; Mehrere Standorte; Stadtweite Lösungen", "wartungsaufwand": "Niedriger Wartungsaufwand", "implementierungsaufwand": "Niedriger Implementierungsaufwand", "website": "https://arivo.co/"}, {"firma": "Parking Solutions Deutschland GmbH / Avantpark", "einsatzumgebung": "Innenstadt; Parkhaus; Küstenregion; Pendlerparkplätze; Krankenhäuser / Kliniken; Messegelände / Stadien", "infrastrukturbedarf": "geringer Eingriff", "technologieart": "Kamerasysteme; Kennzeichenerkennung; App-Lösung; Parkautomaten; Bezahlsystem", "integrationsgrad": "Teilintegration; Vollintegration", "digitalisierungsgrad": "Vollautomatisiert", "datenschutz": "Gering", "betriebsmodell": "Managed Service; Full Service", "nutzerinteraktion": "Terminal Verfügbarkeit; App Verfügbarkeit", "skalierbarkeit": "Einzelstandort; Mehrere Standorte", "wartungsaufwand": "Niedriger Wartungsaufwand", "implementierungsaufwand": "Niedriger Implementierungsaufwand", "website": "https://www.avantpark.de/"}, {"firma": "Parklio GmbH", "einsatzumgebung": "Innenstadt; Parkhaus;  Krankenhäuser / Kliniken; Messegelände / Stadien; Einzelparkplätze", "infrastrukturbedarf": "geringer Eingriff", "technologieart": "Kamerasysteme; Schrankensystem; Bodensensorik; Bezahlsystem; KI-Analyse; Fahrzeugdifferenzierung; Schrankenloses System; App-Lösung; Parkautomaten; Cloud-Plattform", "integrationsgrad": "Teilintegration; Vollintegration", "digitalisierungsgrad": "Vollautomatisiert", "datenschutz": "Hoch", "betriebsmodell": "Eigenbetrieb; SaaS", "nutzerinteraktion": "App Verfügbarkeit; Terminal Verfügbarkeit", "skalierbarkeit": "Einzelstandort; Mehrere Standorte; Stadtweite Lösungen", "wartungsaufwand": "Niedriger Wartungsaufwand", "implementierungsaufwand": "Niedriger Implementierungsaufwand", "website": "https://parklio.com/de/"}, {"firma": "Wemolo GmbH", "einsatzumgebung": "Innenstadt; Parkhaus; Küstenregion; Pendlerparkplätze; Krankenhäuser / Kliniken; Messegelände / Stadien", "infrastrukturbedarf": "geringer Eingriff", "technologieart": "App-Lösung; Kamerasysteme; Kennzeichenerkennung; Bezahlsystem; KI-Analyse; Parkautomaten", "integrationsgrad": "Teilintegration", "digitalisierungsgrad": "Vollautomatisiert", "datenschutz": "Hoch", "betriebsmodell": "Managed Service; SaaS", "nutzerinteraktion": "App Verfügbarkeit; Terminal Verfügbarkeit", "skalierbarkeit": "Einzelstandort; Mehrere Standorte; Stadtweite Lösungen", "wartungsaufwand": "Niedriger Wartungsaufwand", "implementierungsaufwand": "Niedriger Implementierungsaufwand", "website": "https://www.wemolo.com/"}, {"firma": "PARKcontrol24 Ltd.", "einsatzumgebung": "Innenstadt", "infrastrukturbedarf": "geringer Eingriff", "technologieart": "Kamerasysteme; Bezahlsystem; App-Lösung; Kennzeichenerkennung", "integrationsgrad": "Stand-alone", "digitalisierungsgrad": "Analog unterstützt; Teilautomatisiert; Vollautomatisiert", "datenschutz": "Hoch", "betriebsmodell": "SaaS; Managed Service", "nutzerinteraktion": "App Verfügbarkeit", "skalierbarkeit": "Einzelstandort; Mehrere Standorte", "wartungsaufwand": "Niedriger Wartungsaufwand", "implementierungsaufwand": "Niedriger Implementierungsaufwand", "website": "https://parkcontrol24.de/"}, {"firma": "fair parken GmbH", "einsatzumgebung": "Innenstadt; Parkhaus; Küstenregion; Pendlerparkplätze; Krankenhäuser / Kliniken; Messegelände / Stadien", "infrastrukturbedarf": "geringer Eingriff", "technologieart": "Kamerasysteme; Bezahlsystem; Kennzeichenerkennung; App-Lösung; Cloud-Plattform; Parkautomaten", "integrationsgrad": "Teilintegration; Vollintegration", "digitalisierungsgrad": "Teilautomatisiert; Vollautomatisiert", "datenschutz": "Hoch", "betriebsmodell": "SaaS; Managed Service; Full Service", "nutzerinteraktion": "App Verfügbarkeit; Terminal Verfügbarkeit", "skalierbarkeit": "Einzelstandort; Mehrere Standorte; Stadtweite Lösungen", "wartungsaufwand": "Niedriger Wartungsaufwand", "implementierungsaufwand": "Niedriger Implementierungsaufwand", "website": "https://www.fairparken.com/de-DE/"}, {"firma": "PRS Parkraum Service GmbH", "einsatzumgebung": "Innenstadt; Parkhaus; Küstenregion; Pendlerparkplätze; Krankenhäuser / Kliniken; Messegelände / Stadien", "infrastrukturbedarf": "geringer Eingriff", "technologieart": "Bodensensorik; Kamerasysteme; Schrankenloses System; Parkautomaten; Cloud-Plattform; Kennzeichenerkennung; Bezahlsystem", "integrationsgrad": "Stand-alone; Teilintegration", "digitalisierungsgrad": "Vollautomatisiert", "datenschutz": "Hoch", "betriebsmodell": "SaaS; Managed Service; Full Service", "nutzerinteraktion": "App Verfügbarkeit; Terminal Verfügbarkeit", "skalierbarkeit": "Einzelstandort; Mehrere Standorte; Stadtweite Lösungen", "wartungsaufwand": "Niedriger Wartungsaufwand", "implementierungsaufwand": "Niedriger Implementierungsaufwand", "website": "https://parkraumservice.de/"}, {"firma": "ParkRaum- Management PRM GmbH", "einsatzumgebung": "Innenstadt; Krankenhäuser / Kliniken; Küstenregion; Messegelände / Stadien; Parkhaus; Pendlerparkplätze; Einzelparkplätze", "infrastrukturbedarf": "geringer Eingriff", "technologieart": "KI-Analyse; Bodensensorik; Schrankensystem; Schrankenloses System; Kamerasysteme; Kennzeichenerkennung; App-Lösung; Bezahlsystem; Cloud-Plattform", "integrationsgrad": "Teilintegration", "digitalisierungsgrad": "Teilautomatisiert; Vollautomatisiert", "datenschutz": "Hoch", "betriebsmodell": "SaaS; Managed Service", "nutzerinteraktion": "App Verfügbarkeit; Terminal Verfügbarkeit", "skalierbarkeit": "Einzelstandort; Mehrere Standorte; Stadtweite Lösungen", "wartungsaufwand": "Niedriger Wartungsaufwand", "implementierungsaufwand": "Niedriger Implementierungsaufwand", "website": "https://www.prm-parken.de/"}, {"firma": "Peter Park System GmbH", "einsatzumgebung": "Innenstadt; Parkhaus; Küstenregion; Pendlerparkplätze; Krankenhäuser / Kliniken; Messegelände / Stadien", "infrastrukturbedarf": "geringer Eingriff", "technologieart": "KI-Analyse; Kamerasysteme; Kennzeichenerkennung; Schrankenloses System; App-Lösung; Bezahlsystem; Cloud-Plattform", "integrationsgrad": "Teilintegration; Vollintegration", "digitalisierungsgrad": "Vollautomatisiert", "datenschutz": "Hoch", "betriebsmodell": "SaaS; Managed Service; Full Service", "nutzerinteraktion": "App Verfügbarkeit; Terminal Verfügbarkeit", "skalierbarkeit": "Einzelstandort; Mehrere Standorte; Stadtweite Lösungen", "wartungsaufwand": "Niedriger Wartungsaufwand", "implementierungsaufwand": "Niedriger Implementierungsaufwand", "website": "https://www.peter-park.de/"}, {"firma": "APCOA Deutschland GmbH", "einsatzumgebung": "Innenstadt;Parkhaus;  Krankenhäuser / Kliniken; Messegelände / Stadien; ", "infrastrukturbedarf": "geringer Eingriff", "technologieart": "Kamerasysteme; Kennzeichenerkennung; Schrankensystem; Bezahlsystem; App-Lösung; Parkautomaten; Cloud-Plattform", "integrationsgrad": "Teilintegration; Vollintegration", "digitalisierungsgrad": "Vollautomatisiert", "datenschutz": "Hoch", "betriebsmodell": "Eigenbetrieb; SaaS; Managed Service; Full Service", "nutzerinteraktion": "App Verfügbarkeit; Terminal Verfügbarkeit", "skalierbarkeit": "Einzelstandort; Mehrere Standorte; Stadtweite Lösungen", "wartungsaufwand": "Niedriger Wartungsaufwand", "implementierungsaufwand": "Niedriger Implementierungsaufwand", "website": "https://de.apcoa.com/"}, {"firma": "Goldbeck GmbH", "einsatzumgebung": "Parkhaus; Messegelände / Stadien; Krankenhäuser / Kliniken", "infrastrukturbedarf": "geringer Eingriff", "technologieart": "Bezahlsystem; App-Lösung; Cloud-Plattform", "integrationsgrad": "Teilintegration; Vollintegration", "digitalisierungsgrad": "Vollautomatisiert", "datenschutz": "Gering", "betriebsmodell": "SaaS; Managed Service; Full Service", "nutzerinteraktion": "App Verfügbarkeit", "skalierbarkeit": "Einzelstandort", "wartungsaufwand": "Niedriger Wartungsaufwand", "implementierungsaufwand": "Niedriger Implementierungsaufwand", "website": "https://www.goldbeck.de/produkte-services/goldbeck-plus/plusgate"}, {"firma": "ICA Service GmbH", "einsatzumgebung": "Innenstadt; Parkhaus; Küstenregion; Pendlerparkplätze; Krankenhäuser / Kliniken; Messegelände / Stadien", "infrastrukturbedarf": "geringer Eingriff", "technologieart": "Kamerasysteme; Kennzeichenerkennung; Bezahlsystem; Fahrzeugdifferenzierung; App-Lösung; Parkautomaten; Cloud-Plattform; Schrankenloses System; Schrankensystem", "integrationsgrad": "Teilintegration; Vollintegration", "digitalisierungsgrad": "Vollautomatisiert", "datenschutz": "Hoch", "betriebsmodell": "SaaS; Managed Service; Full Service", "nutzerinteraktion": "App Verfügbarkeit; Terminal Verfügbarkeit", "skalierbarkeit": "Einzelstandort; Mehrere Standorte; Stadtweite Lösungen", "wartungsaufwand": "Niedriger Wartungsaufwand", "implementierungsaufwand": "Niedriger Implementierungsaufwand", "website": "https://ica.de/parking-produkte/parkplatzmanagement/"}, {"firma": "Smart City System Parking Soulutions GmbH", "einsatzumgebung": "Innenstadt; Parkhaus; Pendlerparkplätze", "infrastrukturbedarf": "geringer Eingriff", "technologieart": "Kamerasysteme; Kennzeichenerkennung; Bezahlsystem; App-Lösung; Parkautomaten; Cloud-Plattform; Schrankenloses System", "integrationsgrad": "Teilintegration; Vollintegration", "digitalisierungsgrad": "Vollautomatisiert", "datenschutz": "Hoch", "betriebsmodell": "Eigenbetrieb; SaaS; Managed Service", "nutzerinteraktion": "", "skalierbarkeit": "Einzelstandort; Mehrere Standorte", "wartungsaufwand": "Niedriger Wartungsaufwand", "implementierungsaufwand": "Niedriger Implementierungsaufwand", "website": "https://smart-city-system.com/"}, {"firma": "SKIDATA Deutschland  GmbH", "einsatzumgebung": "Innenstadt; Parkhaus; Küstenregion; Pendlerparkplätze; Krankenhäuser / Kliniken; Messegelände / Stadien", "infrastrukturbedarf": "geringer Eingriff", "technologieart": "Kamerasysteme; Kennzeichenerkennung; Bezahlsystem; App-Lösung; Parkautomaten; Cloud-Plattform; Schrankenloses System; Schrankensystem", "integrationsgrad": "Teilintegration; Vollintegration", "digitalisierungsgrad": "Teilautomatisiert; Vollautomatisiert", "datenschutz": "Hoch", "betriebsmodell": "Eigenbetrieb; SaaS; Managed Service; Full Service", "nutzerinteraktion": "App Verfügbarkeit; Terminal Verfügbarkeit", "skalierbarkeit": "Einzelstandort; Mehrere Standorte; Stadtweite Lösungen", "wartungsaufwand": "Niedriger Wartungsaufwand", "implementierungsaufwand": "Niedriger Implementierungsaufwand", "website": "https://www.skidata.com/de-de/skidata-blog/digitales-parken"}, {"firma": "CAME Deutschland GmbH", "einsatzumgebung": "Innenstadt; Parkhaus; Küstenregion; Pendlerparkplätze; Krankenhäuser / Kliniken; Messegelände / Stadien", "infrastrukturbedarf": "geringer Eingriff", "technologieart": "Bodensensorik; Kamerasysteme; Schrankenloses System, Schrankensystem; Parkautomaten; Cloud-Plattform; Kennzeichenerkennung; Bezahlsystem", "integrationsgrad": "Teilintegration; Vollintegration", "digitalisierungsgrad": "Vollautomatisiert", "datenschutz": "Hoch", "betriebsmodell": "Eigenbetrieb; SaaS; Managed Service", "nutzerinteraktion": "App Verfügbarkeit; Terminal Verfügbarkeit", "skalierbarkeit": "Einzelstandort; Mehrere Standorte; Stadtweite Lösungen", "wartungsaufwand": "Niedriger Wartungsaufwand", "implementierungsaufwand": "Niedriger Implementierungsaufwand", "website": "https://www.came.com/de/installateur/loesungen/parksysteme/parkraummanagement"}];
+const DATA = [{"firma": "Smart Parking GmbH", "einsatzumgebung": "Innenstadt; Parkhaus; Küstenregion; Pendlerparkplätze; Krankenhäuser / Kliniken; Messegelände / Stadien", "infrastrukturbedarf": "geringer Eingriff; großer Eingriff", "technologieart": "Kamerasysteme; Kennzeichenerkennung; Bezahlsystem; Cloud-Plattform; Parkautomaten; App-Lösung", "integrationsgrad": "Stand-alone; Teilintegration; Vollintegration", "digitalisierungsgrad": "Analog unterstützt; Teilautomatisiert; Vollautomatisiert", "datenerfassung": "Niedrig", "datenschutz": "Mittel", "betriebsmodell": "SaaS; Managed Service", "nutzerinteraktion": "App Verfügbarkeit; Terminal Verfügbarkeit", "skalierbarkeit": "Einzelstandort; Mehrere Standorte; Stadtweite Lösungen", "wartungsaufwand": "Niedrig", "implementierungsaufwand": "Niedrig", "website": "https://www.smartparking.com/de/"}, {"firma": "Arivo GmbH", "einsatzumgebung": "Innenstadt; Parkhaus; Küstenregion; Pendlerparkplätze; Krankenhäuser / Kliniken; Messegelände / Stadien", "infrastrukturbedarf": "geringer Eingriff; großer Eingriff", "technologieart": "Kamerasysteme; Kennzeichenerkennung; Schrankenloses System; Bezahlsystem; App-Lösung; Schrankensystem; Parkautomaten; Cloud-Plattform", "integrationsgrad": "Stand-alone; Teilintegration; Vollintegration", "digitalisierungsgrad": "Teilautomatisiert; Vollautomatisiert", "datenerfassung": "Hoch", "datenschutz": "Hoch", "betriebsmodell": "Eigenbetrieb; SaaS; Managed Service; Full Service", "nutzerinteraktion": "Keine Nutzerinteraktion; App Verfügbarkeit; Terminal Verfügbarkeit", "skalierbarkeit": "Einzelstandort; Mehrere Standorte; Stadtweite Lösungen", "wartungsaufwand": "Mittel", "implementierungsaufwand": "Niedrig", "website": "https://arivo.co/"}, {"firma": "Parking Solutions Deutschland GmbH / Avantpark", "einsatzumgebung": "Innenstadt; Parkhaus; Küstenregion; Pendlerparkplätze; Krankenhäuser / Kliniken; Messegelände / Stadien", "infrastrukturbedarf": "mittlerer Eingriff", "technologieart": "Kamerasysteme; Kennzeichenerkennung; App-Lösung; Parkautomaten; Bezahlsystem", "integrationsgrad": "Teilintegration; Vollintegration", "digitalisierungsgrad": "Vollautomatisiert", "datenerfassung": "Niedrig", "datenschutz": "Gering", "betriebsmodell": "Managed Service; Full Service", "nutzerinteraktion": "Terminal Verfügbarkeit; App Verfügbarkeit", "skalierbarkeit": "Einzelstandort; Mehrere Standorte", "wartungsaufwand": "Niedrig", "implementierungsaufwand": "Niedrig", "website": "https://www.avantpark.de/"}, {"firma": "Parklio GmbH", "einsatzumgebung": "Innenstadt; Parkhaus;  Krankenhäuser / Kliniken; Messegelände / Stadien; Einzelparkplätze", "infrastrukturbedarf": "großer Eingriff", "technologieart": "Kamerasysteme; Schrankensystem; Bodensensorik; Bezahlsystem; KI-Analyse; Fahrzeugdifferenzierung; Schrankenloses System; App-Lösung; Parkautomaten; Cloud-Plattform", "integrationsgrad": "Teilintegration; Vollintegration", "digitalisierungsgrad": "Vollautomatisiert", "datenerfassung": "Hoch", "datenschutz": "Hoch", "betriebsmodell": "Eigenbetrieb; SaaS", "nutzerinteraktion": "App Verfügbarkeit; Terminal Verfügbarkeit", "skalierbarkeit": "Einzelstandort; Mehrere Standorte; Stadtweite Lösungen", "wartungsaufwand": "Niedrig", "implementierungsaufwand": "Niedrig", "website": "https://parklio.com/de/"}, {"firma": "Wemolo GmbH", "einsatzumgebung": "Innenstadt; Parkhaus; Küstenregion; Pendlerparkplätze; Krankenhäuser / Kliniken; Messegelände / Stadien", "infrastrukturbedarf": "mittlerer Eingriff; geringer Eingriff", "technologieart": "App-Lösung; Kamerasysteme; Kennzeichenerkennung; Bezahlsystem; KI-Analyse; Parkautomaten", "integrationsgrad": "Teilintegration", "digitalisierungsgrad": "Vollautomatisiert", "datenerfassung": "Hoch", "datenschutz": "Hoch", "betriebsmodell": "Managed Service; SaaS", "nutzerinteraktion": "App Verfügbarkeit; Terminal Verfügbarkeit", "skalierbarkeit": "Einzelstandort; Mehrere Standorte; Stadtweite Lösungen", "wartungsaufwand": "Niedrig; Hoch", "implementierungsaufwand": "Niedrig; Hoch", "website": "https://www.wemolo.com/"}, {"firma": "PARKcontrol24 Ltd.", "einsatzumgebung": "Innenstadt", "infrastrukturbedarf": "geringer Eingriff", "technologieart": "Kamerasysteme; Bezahlsystem; App-Lösung; Kennzeichenerkennung", "integrationsgrad": "Stand-alone", "digitalisierungsgrad": "Analog unterstützt; Teilautomatisiert; Vollautomatisiert", "datenerfassung": "Hoch", "datenschutz": "Hoch", "betriebsmodell": "SaaS; Managed Service", "nutzerinteraktion": "App Verfügbarkeit", "skalierbarkeit": "Einzelstandort; Mehrere Standorte", "wartungsaufwand": "Niedrig", "implementierungsaufwand": "Niedrig", "website": "https://parkcontrol24.de/"}, {"firma": "fair parken GmbH", "einsatzumgebung": "Innenstadt; Parkhaus; Küstenregion; Pendlerparkplätze; Krankenhäuser / Kliniken; Messegelände / Stadien", "infrastrukturbedarf": "mittlerer Eingriff", "technologieart": "Kamerasysteme; Bezahlsystem; Kennzeichenerkennung; App-Lösung; Cloud-Plattform; Parkautomaten", "integrationsgrad": "Teilintegration; Vollintegration", "digitalisierungsgrad": "Teilautomatisiert; Vollautomatisiert", "datenerfassung": "Hoch", "datenschutz": "Hoch", "betriebsmodell": "SaaS; Managed Service; Full Service", "nutzerinteraktion": "App Verfügbarkeit; Terminal Verfügbarkeit", "skalierbarkeit": "Einzelstandort; Mehrere Standorte; Stadtweite Lösungen", "wartungsaufwand": "Mittel", "implementierungsaufwand": "Mittel", "website": "https://www.fairparken.com/de-DE/"}, {"firma": "PRS Parkraum Service GmbH", "einsatzumgebung": "Innenstadt; Parkhaus; Küstenregion; Pendlerparkplätze; Krankenhäuser / Kliniken; Messegelände / Stadien", "infrastrukturbedarf": "mittlerer Eingriff", "technologieart": "Bodensensorik; Kamerasysteme; Schrankenloses System; Parkautomaten; Cloud-Plattform; Kennzeichenerkennung; Bezahlsystem", "integrationsgrad": "Stand-alone; Teilintegration", "digitalisierungsgrad": "Vollautomatisiert", "datenerfassung": "Hoch", "datenschutz": "Hoch", "betriebsmodell": "SaaS; Managed Service; Full Service", "nutzerinteraktion": "App Verfügbarkeit; Terminal Verfügbarkeit", "skalierbarkeit": "Einzelstandort; Mehrere Standorte; Stadtweite Lösungen", "wartungsaufwand": "Niedrig", "implementierungsaufwand": "Niedrig", "website": "https://parkraumservice.de/"}, {"firma": "ParkRaum- Management PRM GmbH", "einsatzumgebung": "Innenstadt; Krankenhäuser / Kliniken; Küstenregion; Messegelände / Stadien; Parkhaus; Pendlerparkplätze; Einzelparkplätze", "infrastrukturbedarf": "mittlerer Eingriff", "technologieart": "KI-Analyse; Bodensensorik; Schrankensystem; Schrankenloses System; Kamerasysteme; Kennzeichenerkennung; App-Lösung; Bezahlsystem; Cloud-Plattform", "integrationsgrad": "Teilintegration", "digitalisierungsgrad": "Teilautomatisiert; Vollautomatisiert", "datenerfassung": "Hoch", "datenschutz": "Hoch", "betriebsmodell": "SaaS; Managed Service", "nutzerinteraktion": "App Verfügbarkeit; Terminal Verfügbarkeit", "skalierbarkeit": "Einzelstandort; Mehrere Standorte; Stadtweite Lösungen", "wartungsaufwand": "Mittel", "implementierungsaufwand": "Mittel", "website": "https://www.prm-parken.de/"}, {"firma": "Peter Park System GmbH", "einsatzumgebung": "Innenstadt; Parkhaus; Küstenregion; Pendlerparkplätze; Krankenhäuser / Kliniken; Messegelände / Stadien", "infrastrukturbedarf": "geringer Eingriff", "technologieart": "KI-Analyse; Kamerasysteme; Kennzeichenerkennung; Schrankenloses System; App-Lösung; Bezahlsystem; Cloud-Plattform", "integrationsgrad": "Teilintegration; Vollintegration", "digitalisierungsgrad": "Vollautomatisiert", "datenerfassung": "Hoch; Niedrig", "datenschutz": "Hoch", "betriebsmodell": "SaaS; Managed Service; Full Service", "nutzerinteraktion": "App Verfügbarkeit; Terminal Verfügbarkeit", "skalierbarkeit": "Einzelstandort; Mehrere Standorte; Stadtweite Lösungen", "wartungsaufwand": "Niedrig", "implementierungsaufwand": "Niedrig", "website": "https://www.peter-park.de/"}, {"firma": "APCOA Deutschland GmbH", "einsatzumgebung": "Innenstadt;Parkhaus;  Krankenhäuser / Kliniken; Messegelände / Stadien; ", "infrastrukturbedarf": "mittlerer Eingriff", "technologieart": "Kamerasysteme; Kennzeichenerkennung; Schrankensystem; Bezahlsystem; App-Lösung; Parkautomaten; Cloud-Plattform", "integrationsgrad": "Teilintegration; Vollintegration", "digitalisierungsgrad": "Vollautomatisiert", "datenerfassung": "Niedrig", "datenschutz": "Hoch", "betriebsmodell": "Eigenbetrieb; SaaS; Managed Service; Full Service", "nutzerinteraktion": "App Verfügbarkeit; Terminal Verfügbarkeit", "skalierbarkeit": "Einzelstandort; Mehrere Standorte; Stadtweite Lösungen", "wartungsaufwand": "Niedrig", "implementierungsaufwand": "Niedrig", "website": "https://de.apcoa.com/"}, {"firma": "Goldbeck GmbH", "einsatzumgebung": "Parkhaus; Messegelände / Stadien; Krankenhäuser / Kliniken", "infrastrukturbedarf": "mittlerer Eingriff", "technologieart": "Bezahlsystem; App-Lösung; Cloud-Plattform", "integrationsgrad": "Teilintegration; Vollintegration", "digitalisierungsgrad": "Vollautomatisiert", "datenerfassung": "Niedrig", "datenschutz": "Gering", "betriebsmodell": "SaaS; Managed Service; Full Service", "nutzerinteraktion": "App Verfügbarkeit", "skalierbarkeit": "Einzelstandort", "wartungsaufwand": "Niedrig", "implementierungsaufwand": "Niedrig", "website": "https://www.goldbeck.de/produkte-services/goldbeck-plus/plusgate"}, {"firma": "ICA Service GmbH", "einsatzumgebung": "Innenstadt; Parkhaus; Küstenregion; Pendlerparkplätze; Krankenhäuser / Kliniken; Messegelände / Stadien", "infrastrukturbedarf": "geringer Eingriff", "technologieart": "Kamerasysteme; Kennzeichenerkennung; Bezahlsystem; Fahrzeugdifferenzierung; App-Lösung; Parkautomaten; Cloud-Plattform; Schrankenloses System; Schrankensystem", "integrationsgrad": "Teilintegration; Vollintegration", "digitalisierungsgrad": "Vollautomatisiert", "datenerfassung": "Hoch", "datenschutz": "Hoch", "betriebsmodell": "SaaS; Managed Service; Full Service", "nutzerinteraktion": "App Verfügbarkeit; Terminal Verfügbarkeit", "skalierbarkeit": "Einzelstandort; Mehrere Standorte; Stadtweite Lösungen", "wartungsaufwand": "Niedrig", "implementierungsaufwand": "Niedrig", "website": "https://ica.de/parking-produkte/parkplatzmanagement/"}, {"firma": "Smart City System Parking Soulutions GmbH", "einsatzumgebung": "Innenstadt; Parkhaus; Pendlerparkplätze", "infrastrukturbedarf": "mittlerer Eingriff", "technologieart": "Kamerasysteme; Kennzeichenerkennung; Bezahlsystem; App-Lösung; Parkautomaten; Cloud-Plattform; Schrankenloses System", "integrationsgrad": "Teilintegration; Vollintegration", "digitalisierungsgrad": "Vollautomatisiert", "datenerfassung": "Hoch", "datenschutz": "Hoch", "betriebsmodell": "Eigenbetrieb; SaaS; Managed Service", "nutzerinteraktion": "", "skalierbarkeit": "Einzelstandort; Mehrere Standorte", "wartungsaufwand": "Niedrig", "implementierungsaufwand": "Niedrig", "website": "https://smart-city-system.com/"}, {"firma": "SKIDATA Deutschland  GmbH", "einsatzumgebung": "Innenstadt; Parkhaus; Küstenregion; Pendlerparkplätze; Krankenhäuser / Kliniken; Messegelände / Stadien", "infrastrukturbedarf": "geringer Eingriff", "technologieart": "Kamerasysteme; Kennzeichenerkennung; Bezahlsystem; App-Lösung; Parkautomaten; Cloud-Plattform; Schrankenloses System; Schrankensystem", "integrationsgrad": "Teilintegration; Vollintegration", "digitalisierungsgrad": "Teilautomatisiert; Vollautomatisiert", "datenerfassung": "Hoch", "datenschutz": "Hoch", "betriebsmodell": "Eigenbetrieb; SaaS; Managed Service; Full Service", "nutzerinteraktion": "App Verfügbarkeit; Terminal Verfügbarkeit", "skalierbarkeit": "Einzelstandort; Mehrere Standorte; Stadtweite Lösungen", "wartungsaufwand": "Niedrig", "implementierungsaufwand": "Niedrig", "website": "https://www.skidata.com/de-de/skidata-blog/digitales-parken"}, {"firma": "CAME Deutschland GmbH", "einsatzumgebung": "Innenstadt; Parkhaus; Küstenregion; Pendlerparkplätze; Krankenhäuser / Kliniken; Messegelände / Stadien", "infrastrukturbedarf": "geringer Eingriff", "technologieart": "Bodensensorik; Kamerasysteme; Schrankenloses System, Schrankensystem; Parkautomaten; Cloud-Plattform; Kennzeichenerkennung; Bezahlsystem", "integrationsgrad": "Teilintegration; Vollintegration", "digitalisierungsgrad": "Vollautomatisiert", "datenerfassung": "Hoch", "datenschutz": "Hoch", "betriebsmodell": "Eigenbetrieb; SaaS; Managed Service", "nutzerinteraktion": "App Verfügbarkeit; Terminal Verfügbarkeit", "skalierbarkeit": "Einzelstandort; Mehrere Standorte; Stadtweite Lösungen", "wartungsaufwand": "Niedrig", "implementierungsaufwand": "Niedrig", "website": "https://www.came.com/de/installateur/loesungen/parksysteme/parkraummanagement"}];
 
 const TECHNOLOGIEN = [
   "Bodensensorik", "Kamerasysteme", "KI-Analyse", "Kennzeichenerkennung",
@@ -160,8 +164,30 @@ function selectedChecks(name) {
 function makeChecks(containerId, name, options) {
   const c = document.getElementById(containerId);
   c.innerHTML = options.map(o => `
-    <label class="check"><input type="checkbox" name="${name}" value="${o}"> ${o}</label>
+    <label class="check"><input type="checkbox" name="${name}" value="${o}" onchange="filterData()"> ${o}</label>
   `).join("");
+}
+function maxLevel(a, b) {
+  const order = { niedrig: 1, mittel: 2, hoch: 3 };
+  return order[b] > order[a] ? b : a;
+}
+function calculateAufwand() {
+  const size = document.getElementById("parkraum").value;
+  const techs = selectedChecks("tech");
+  let level = "niedrig";
+
+  if (size === "51 bis 500") level = "mittel";
+  if (size === "ab 500") level = "hoch";
+
+  if (techs.includes("Schrankensystem")) level = maxLevel(level, "mittel");
+  if (techs.includes("Bodensensorik")) level = "hoch";
+
+  const labels = {
+    niedrig: { infra: "geringer Eingriff", wartung: "Niedriger Wartungsaufwand", impl: "Niedriger Implementierungsaufwand" },
+    mittel: { infra: "mittlerer Eingriff", wartung: "Mittlerer Wartungsaufwand", impl: "Mittlerer Implementierungsaufwand" },
+    hoch: { infra: "großer Eingriff", wartung: "Hoher Wartungsaufwand", impl: "Hoher Implementierungsaufwand" }
+  };
+  return labels[level];
 }
 function filterData() {
   const einsatzort = document.getElementById("einsatzort").value;
@@ -187,19 +213,25 @@ function filterData() {
   render(filtered);
 }
 function render(rows) {
+  const aufwand = calculateAufwand();
   document.getElementById("count").textContent = rows.length + " Anbieter gefunden";
   if (!rows.length) {
     document.getElementById("results").innerHTML = '<div class="empty">Keine Anbieter erfüllen alle ausgewählten Kriterien. Bitte Auswahl reduzieren.</div>';
     return;
   }
   document.getElementById("results").innerHTML = `
+    <div class="summary">
+      <div class="summaryBox"><strong>Infrastruktureingriff</strong>${aufwand.infra}</div>
+      <div class="summaryBox"><strong>Wartungsaufwand</strong>${aufwand.wartung}</div>
+      <div class="summaryBox"><strong>Implementierungsaufwand</strong>${aufwand.impl}</div>
+    </div>
     <div class="tableWrap">
       <table>
         <thead>
           <tr>
             <th>Firma</th><th>Einsatzumgebung</th><th>Technologieart</th><th>Integrationsgrad</th>
             <th>Digitalisierung</th><th>Datenschutz</th><th>Betriebsmodell</th><th>Nutzerinteraktion</th>
-            <th>Skalierbarkeit</th><th>Wartung</th><th>Implementierung</th>
+            <th>Skalierbarkeit</th><th>Infrastruktureingriff</th><th>Wartung</th><th>Implementierung</th>
           </tr>
         </thead>
         <tbody>
@@ -214,8 +246,9 @@ function render(rows) {
               <td>${d.betriebsmodell}</td>
               <td>${d.nutzerinteraktion || "-"}</td>
               <td>${d.skalierbarkeit}</td>
-              <td>${d.wartungsaufwand}</td>
-              <td>${d.implementierungsaufwand}</td>
+              <td>${aufwand.infra}</td>
+              <td>${aufwand.wartung}</td>
+              <td>${aufwand.impl}</td>
             </tr>`).join("")}
         </tbody>
       </table>
